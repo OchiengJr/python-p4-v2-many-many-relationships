@@ -1,19 +1,27 @@
-# server/app.py
 #!/usr/bin/env python3
 
-from flask import Flask
+from flask import Flask, jsonify
 from flask_migrate import Migrate
-
 from models import db
+from config import Config
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.json.compact = False
+def create_app(config_class=Config):
+    app = Flask(__name__)
+    app.config.from_object(config_class)
+    app.json.compact = False
 
-migrate = Migrate(app, db)
-db.init_app(app)
+    db.init_app(app)
+    Migrate(app, db)
 
+    @app.route('/')
+    def index():
+        return jsonify({'message': 'Welcome to the API'})
+
+    # Register additional blueprints/routes here
+
+    return app
+
+app = create_app()
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
